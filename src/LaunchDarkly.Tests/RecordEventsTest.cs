@@ -1,14 +1,14 @@
 ﻿using Moq;
-using NUnit.Framework;
 using LaunchDarkly.Client;
 using System.Net.Http;
+using Xunit;
 
 namespace LaunchDarkly.Tests
 {
     public class RecordEventsTest
     {
-        [Test]
-        public void CanRaiseACustomEvent()
+        [Fact]
+        public async void CanRaiseACustomEvent()
         {
             var config = Configuration.Default();
             var eventStore = new Mock<IStoreEvents>();

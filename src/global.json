@@ -1,0 +1,6 @@
+{
+    "projects": [
+        "LaunchDarkly.Client",
+        "LaunchDarkly.Tests"
+    ]
+}

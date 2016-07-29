@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Configuration;
-using System.Net;
-using System.Net.Cache;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
 
 namespace LaunchDarkly.Client
 {
@@ -21,7 +20,10 @@ namespace LaunchDarkly.Client
         {
             get
             {
-                var version = System.Reflection.Assembly.GetAssembly(typeof(LdClient)).GetName().Version;
+                var assembly = typeof(LdClient).GetTypeInfo().Assembly;
+                
+                var assemblyVersion = (AssemblyInformationalVersionAttribute)assembly.GetCustomAttribute(typeof(AssemblyInformationalVersionAttribute));
+                var version = assemblyVersion.InformationalVersion;
                 _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("DotNetClient/" + version);
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("api_key", ApiKey);
                 return _httpClient;
@@ -50,10 +52,11 @@ namespace LaunchDarkly.Client
                 EventQueueFrequency = DefaultEventQueueFrequency,
                 PollingInterval = DefaultPollingInterval,
                 StartWaitTime = DefaultStartWaitTime,
-                _httpClient = new HttpClient(new WebRequestHandler()
+                _httpClient = new HttpClient(new HttpClientHandler
                 {
+                    // TODO: .net core equivalent?
                     // RequestCacheLevel.Revalidate enables proper Etag caching
-                    CachePolicy = new RequestCachePolicy(RequestCacheLevel.Revalidate)
+                    // CachePolicy = new RequestCachePolicy(RequestCacheLevel.Revalidate)
                 })
 
 
@@ -63,7 +66,10 @@ namespace LaunchDarkly.Client
 
         private static Configuration OverwriteFromFile(Configuration defaultConfiguration)
         {
-            var configSection = (IDictionary)ConfigurationManager.GetSection("LaunchDarkly");
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+            var configSection = (IDictionary)config.GetSection("LaunchDarkly");
             if (configSection == null) return defaultConfiguration;
 
             return defaultConfiguration

@@ -1,11 +1,12 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using LaunchDarkly.Client.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections;
 
 namespace LaunchDarkly.Client
 {
@@ -96,7 +97,7 @@ namespace LaunchDarkly.Client
             {
                 return false;
             }
-            if (!(userValue is string) && typeof(IEnumerable).IsAssignableFrom(userValue.GetType()))
+            if (!(userValue is string) && typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(userValue.GetType()))
             {
                 var uvs = (IEnumerable<object>)userValue;
                 return Values.Intersect<object>(uvs).Any();

@@ -169,8 +169,12 @@ pip-log.txt
 # Ignore built nupkgs
 *.nupkg
 
+<<<<<<< b016da6a30bf4765423379db78b5d2794a40b41c
+# netcore project.json lock
+=======
 ########################
 ## .NET Core / VS Code
 ########################
 
+>>>>>>> first pass at .NET Core implementation
 project.lock.json

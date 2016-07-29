@@ -6,7 +6,7 @@ namespace LaunchDarkly.Client
     public class InMemoryFeatureStore : IFeatureStore
     {
         private static readonly int RwLockMaxWaitMillis = 1000;
-        private readonly ReaderWriterLock RwLock = new ReaderWriterLock();
+        private readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim();
         private readonly IDictionary<string, Feature> Features = new Dictionary<string, Feature>();
         private bool _initialized = false;
 
@@ -14,7 +14,7 @@ namespace LaunchDarkly.Client
         {
             try
             {
-                RwLock.AcquireReaderLock(RwLockMaxWaitMillis);
+                RwLock.TryEnterReadLock(RwLockMaxWaitMillis);
                 Feature f;
                 if (!Features.TryGetValue(key, out f) || f.Deleted)
                 {
@@ -24,7 +24,7 @@ namespace LaunchDarkly.Client
             }
             finally
             {
-                RwLock.ReleaseReaderLock();
+                RwLock.ExitReadLock();
             }
         }
 
@@ -32,7 +32,7 @@ namespace LaunchDarkly.Client
         {
             try
             {
-                RwLock.AcquireReaderLock(RwLockMaxWaitMillis);
+                RwLock.TryEnterReadLock(RwLockMaxWaitMillis);
                 IDictionary<string, Feature> fs = new Dictionary<string, Feature>();
                 foreach (var feature in Features)
                 {
@@ -45,7 +45,7 @@ namespace LaunchDarkly.Client
             }
             finally
             {
-                RwLock.ReleaseReaderLock();
+                RwLock.ExitReadLock();
             }
         }
 
@@ -53,7 +53,7 @@ namespace LaunchDarkly.Client
         {
             try
             {
-                RwLock.AcquireWriterLock(RwLockMaxWaitMillis);
+                RwLock.TryEnterWriteLock(RwLockMaxWaitMillis);
                 Features.Clear();
                 foreach (var feature in features)
                 {
@@ -63,7 +63,7 @@ namespace LaunchDarkly.Client
             }
             finally
             {
-                RwLock.ReleaseWriterLock();
+                RwLock.ExitWriteLock();
             }
         }
 
@@ -71,7 +71,7 @@ namespace LaunchDarkly.Client
         {
             try
             {
-                RwLock.AcquireWriterLock(RwLockMaxWaitMillis);
+                RwLock.TryEnterWriteLock(RwLockMaxWaitMillis);
                 Feature f;
                 if (Features.TryGetValue(key, out f) && f.Version < version)
                 {
@@ -89,7 +89,7 @@ namespace LaunchDarkly.Client
             }
             finally
             {
-                RwLock.ReleaseWriterLock();
+                RwLock.ExitWriteLock();
             }
         }
 
@@ -97,7 +97,7 @@ namespace LaunchDarkly.Client
         {
             try
             {
-                RwLock.AcquireWriterLock(RwLockMaxWaitMillis);
+                RwLock.TryEnterWriteLock(RwLockMaxWaitMillis);
                 Feature old;
                 if (!Features.TryGetValue(key, out old) || old.Version < feature.Version)
                 {
@@ -106,7 +106,7 @@ namespace LaunchDarkly.Client
             }
             finally
             {
-                RwLock.ReleaseWriterLock();
+                RwLock.ExitWriteLock();
             }
         }
 

@@ -1,12 +1,11 @@
-﻿using System.IO;
-using LaunchDarkly.Client.Logging;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using Newtonsoft.Json;
-using System.Net;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using Newtonsoft.Json;
+using LaunchDarkly.Client.Logging;
+using System.Text;
 
 namespace LaunchDarkly.Client
 {
@@ -67,16 +66,17 @@ namespace LaunchDarkly.Client
             try
             {
                 string json = JsonConvert.SerializeObject(events.ToList());
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
                 Logger.Debug("Submitting " + events.Count() + " events to " + uri.AbsoluteUri + " with json: " + json);
              
-                using (var responseTask = _httpClient.PostAsJsonAsync(uri, events))
-                {
-                    responseTask.ConfigureAwait(false);
-                    HttpResponseMessage response = responseTask.Result;
+                var responseTask = _httpClient.PostAsync(uri.ToString(), content);
+                responseTask.ConfigureAwait(false);
+                HttpResponseMessage response = responseTask.Result;
 
-                    if (!response.IsSuccessStatusCode)
-                        Logger.Error(string.Format("Error Submitting Events using uri: '{0}'; Status: '{1}'",
-                            uri.AbsoluteUri, response.StatusCode));
+                if (!response.IsSuccessStatusCode) {
+                    Logger.Error(string.Format("Error Submitting Events using uri: '{0}'; Status: '{1}'",
+                        uri.AbsoluteUri, response.StatusCode));
                 }
             }
             catch (Exception ex)

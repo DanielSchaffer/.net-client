@@ -1,28 +1,27 @@
-﻿using LaunchDarkly.Client;
-using Moq;
-using NUnit.Framework;
-using RichardSzalay.MockHttp;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using LaunchDarkly.Client;
+using Moq;
+using RichardSzalay.MockHttp;
+using Xunit;
 
 namespace LaunchDarkly.Tests
 {
-    class FeatureTest
+    class FeatureTest : IDisposable
     {
         private MockHttpMessageHandler mockHttp;
         private Configuration config;
         private LdClient client;
 
-        [SetUp]
-        public void Init()
+        public FeatureTest()
         {
             config = Configuration.Default();
             mockHttp = new MockHttpMessageHandler();
             config.WithHttpClient(new HttpClient(mockHttp));
         }
 
-        [TearDown]
         public void Dispose()
         {
             if (client != null)
@@ -30,7 +29,7 @@ namespace LaunchDarkly.Tests
         }
 
 
-        [Test]
+        [Fact]
         public void IfAFeatureDoesNotExist_ToggleWillReturnDefault()
         {
             mockHttp.When("*").Respond(HttpStatusCode.Unauthorized);
@@ -43,10 +42,10 @@ namespace LaunchDarkly.Tests
 
             var result = client.Toggle("a.non.feature", user, false);
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
         }
 
-        [Test]
+        [Fact]
         public void IfAFeatureDoesNotExist_TheDefaultCanBeOverridden()
         {
             var client = new LdClient(config);
@@ -55,10 +54,10 @@ namespace LaunchDarkly.Tests
 
             var result = client.Toggle("a.non.feature", user, true);
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
         }
 
-        [Test]
+        [Fact]
         public void IfAUserHasStringCustomAttributes_TargetRulesMatch()
         {
             var user = User.WithKey("anyUser").AndCustomAttribute("bizzle", "cripps");
@@ -68,10 +67,10 @@ namespace LaunchDarkly.Tests
             target.Op = "in";
             target.Values = new List<object>() { "cripps" };
 
-            Assert.AreEqual(true, target.Matches(user));
+            Assert.Equal(true, target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void IfAUserHasCustomListAttributes_TargetRulesMatch()
         {
             var user = User.WithKey("anyUser").AndCustomAttribute("bizzle", new List<string>() { "cripps", "crupps" });
@@ -81,10 +80,10 @@ namespace LaunchDarkly.Tests
             target.Op = "in";
             target.Values = new List<object>() { "cripps" };
 
-            Assert.AreEqual(true, target.Matches(user));
+            Assert.Equal(true, target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void IfAUserHasCustomAttributeAsFloat_TargetRulesMatch()
         {
             var user = User.WithKey("anyUser").AndCustomAttribute("numbers", 1362823F);
@@ -94,10 +93,10 @@ namespace LaunchDarkly.Tests
             target.Op = "in";
             target.Values = new List<object>() { 1362823F };
 
-            Assert.AreEqual(true, target.Matches(user));
+            Assert.Equal(true, target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void IfAUserHasCustomAttributeAsInteger_TargetRulesMatch()
         {
             var target = new TargetRule();
@@ -106,16 +105,16 @@ namespace LaunchDarkly.Tests
             target.Values = new List<object>() { 9, 55, 1362823, 292 };
 
             var user = User.WithKey("anyUser").AndCustomAttribute("Org", 1362823);
-            Assert.IsTrue(target.Matches(user));
+            Assert.True(target.Matches(user));
 
             user = User.WithKey("anyUser").AndCustomAttribute("Org", 55);
-            Assert.IsTrue(target.Matches(user));
+            Assert.True(target.Matches(user));
 
             user = User.WithKey("anyUser").AndCustomAttribute("Org", 292);
-            Assert.IsTrue(target.Matches(user));
+            Assert.True(target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void IfAUserHasCustomListAttributeAsIntegers_TargetRulesMatch()
         {
 
@@ -125,13 +124,13 @@ namespace LaunchDarkly.Tests
             target.Values = new List<object>() { 55, 1362823 };
 
             var user = User.WithKey("anyUser").AndCustomAttribute("Org", new List<int>() { 1362823 });
-            Assert.AreEqual(true, target.Matches(user));
+            Assert.True(target.Matches(user));
 
             user = User.WithKey("anyUser").AndCustomAttribute("Org", new List<int>() { 55 });
-            Assert.AreEqual(true, target.Matches(user));
+            Assert.True(target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void IfAUserHasNonMatchingCustomListAttributes_TargetRulesDoNotMatch()
         {
             var user = User.WithKey("anyUser").AndCustomAttribute("bizzle", new List<string>() { "cruupps", "crupps" });
@@ -141,10 +140,10 @@ namespace LaunchDarkly.Tests
             target.Op = "in";
             target.Values = new List<object>() { "cripps" };
 
-            Assert.AreEqual(false, target.Matches(user));
+            Assert.False(target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void IfAListHasCustomBoolAttributes_Target_rulesMatch()
         {
             var user = User.WithKey("anyUser").AndCustomAttribute("bizzle", true);
@@ -154,10 +153,10 @@ namespace LaunchDarkly.Tests
             target.Op = "in";
             target.Values = new List<object>() { true };
 
-            Assert.AreEqual(true, target.Matches(user));
+            Assert.True(target.Matches(user));
         }
 
-        [Test]
+        [Fact]
         public void UserDoesNotHaveCustomAttributeSpecifiedInRule()
         {
             var target1 = new TargetRule();
@@ -199,11 +198,11 @@ namespace LaunchDarkly.Tests
 
             //Happy path- user has the targeted custom attribute
             var user = User.WithKey("anyUser").AndCustomAttribute("bizzle", 101);
-            Assert.AreEqual(true, feature.Evaluate(user, false));
+            Assert.True(feature.Evaluate(user, false));
 
             //Test case: User does not have the targeted custom attribute
             user = User.WithKey("anyUser");
-            Assert.AreEqual(true, feature.Evaluate(user, false));
+            Assert.True(feature.Evaluate(user, false));
         }
     }
 }

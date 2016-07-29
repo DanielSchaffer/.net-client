@@ -1,0 +1,56 @@
+{
+<<<<<<< b016da6a30bf4765423379db78b5d2794a40b41c
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.0",
+      "type": "platform"
+    }
+=======
+  "version": "1.0.5-core",
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.0",
+      "type": "default"
+    },
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
+    "Microsoft.Extensions.Configuration.FileExtensions": "1.0.0",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0",
+    "Microsoft.Extensions.Configuration.CommandLine": "1.0.0",
+    "Microsoft.Extensions.Logging": "1.0.0",
+    "Microsoft.Extensions.Logging.Console": "1.0.0",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0",
+    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
+    "Newtonsoft.Json": "9.0.1"
+>>>>>>> first pass at .NET Core implementation
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dotnet5.6",
+        "portable-net45+win8"
+      ]
+    }
+  },
+
+  "buildOptions": {
+<<<<<<< b016da6a30bf4765423379db78b5d2794a40b41c
+    "emitEntryPoint": false,
+    "preserveCompilationContext": true
+  }
+}
+=======
+    "debugType": "portable"
+  },
+
+  "publishOptions": {
+    "include": [
+      "appsettings.json"
+    ]
+  },
+
+  "tooling": {
+    "defaultNamespace": "LaunchDarkly.Client.Core"
+  }
+}
+>>>>>>> first pass at .NET Core implementation

@@ -8,7 +8,7 @@ namespace LaunchDarkly.Client
         public static string Hash(string s)
         {
             var sha = SHA1.Create();
-            byte[] data = sha.ComputeHash(Encoding.Default.GetBytes(s));
+            byte[] data = sha.ComputeHash(Encoding.UTF8.GetBytes(s));
             
             var sb = new StringBuilder();
             foreach (byte t in data)

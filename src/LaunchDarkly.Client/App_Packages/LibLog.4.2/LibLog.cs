@@ -432,7 +432,7 @@ namespace LaunchDarkly.Client.Logging
         private static dynamic s_currentLogProvider;
         private static Action<ILogProvider> s_onCurrentLogProviderSet;
 
-        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        // [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static LogProvider()
         {
             IsDisabled = false;
@@ -506,10 +506,13 @@ namespace LaunchDarkly.Client.Logging
 #else
         internal
 #endif
-        static ILog GetCurrentClassLogger()
+        static ILog GetCurrentClassLogger([CallerMemberName] string memberName = "")
         {
-            var stackFrame = new StackFrame(1, false);
-            return GetLogger(stackFrame.GetMethod().DeclaringType);
+            
+            // var stackFrame = new StackFrame(1, false);
+            // return GetLogger(stackFrame.GetMethod().DeclaringType);
+            // TODO: Figure out a way to get the actual type instead of the member?
+            return GetLogger(memberName);
         }
 #endif
 
@@ -1209,17 +1212,18 @@ namespace LaunchDarkly.Client.Logging.LogProviders
                     lock (CallerStackBoundaryTypeSync)
                     {
 #if !LIBLOG_PORTABLE
-                        StackTrace stack = new StackTrace();
+                        // TODO: any way to do this in .net core?
+                        // StackTrace stack = new StackTrace();
                         Type thisType = GetType();
                         s_callerStackBoundaryType = Type.GetType("LoggerExecutionWrapper");
-                        for (var i = 1; i < stack.FrameCount; i++)
+                        /* for (var i = 1; i < stack.FrameCount; i++)
                         {
                             if (!IsInTypeHierarchy(thisType, stack.GetFrame(i).GetMethod().DeclaringType))
                             {
                                 s_callerStackBoundaryType = stack.GetFrame(i - 1).GetMethod().DeclaringType;
                                 break;
                             }
-                        }
+                        }*/
 #else
                         s_callerStackBoundaryType = typeof (LoggerExecutionWrapper);
 #endif
@@ -1907,47 +1911,47 @@ namespace LaunchDarkly.Client.Logging.LogProviders
     {
         internal static MethodInfo GetMethodPortable(this Type type, string name)
         {
-#if LIBLOG_PORTABLE
+// #if LIBLOG_PORTABLE
             return type.GetRuntimeMethods().SingleOrDefault(m => m.Name == name);
-#else
-            return type.GetMethod(name);
-#endif
+// #else
+//             return type.GetMethod(name);
+// #endif
         }
 
         internal static MethodInfo GetMethodPortable(this Type type, string name, params Type[] types)
         {
-#if LIBLOG_PORTABLE
+// #if LIBLOG_PORTABLE
             return type.GetRuntimeMethod(name, types);
-#else
-            return type.GetMethod(name, types);
-#endif
+// #else
+//             return type.GetMethod(name, types);
+// #endif
         }
 
         internal static PropertyInfo GetPropertyPortable(this Type type, string name)
         {
-#if LIBLOG_PORTABLE
+// #if LIBLOG_PORTABLE
             return type.GetRuntimeProperty(name);
-#else
-            return type.GetProperty(name);
-#endif
+// #else
+//             return type.GetProperty(name);
+// #endif
         }
 
         internal static IEnumerable<FieldInfo> GetFieldsPortable(this Type type)
         {
-#if LIBLOG_PORTABLE
+// #if LIBLOG_PORTABLE
             return type.GetRuntimeFields();
-#else
-            return type.GetFields();
-#endif
+// #else
+//             return type.GetFields();
+// #endif
         }
 
         internal static Type GetBaseTypePortable(this Type type)
         {
-#if LIBLOG_PORTABLE
+// #if LIBLOG_PORTABLE
             return type.GetTypeInfo().BaseType;
-#else
-            return type.BaseType;
-#endif
+// #else
+//             return type.BaseType;
+// #endif
         }
 
 #if LIBLOG_PORTABLE
@@ -1965,17 +1969,17 @@ namespace LaunchDarkly.Client.Logging.LogProviders
 #if !LIBLOG_PORTABLE
         internal static object CreateDelegate(this MethodInfo methodInfo, Type delegateType)
         {
-            return Delegate.CreateDelegate(delegateType, methodInfo);
+            return methodInfo.CreateDelegate(delegateType);
         }
 #endif
 
         internal static Assembly GetAssemblyPortable(this Type type)
         {
-#if LIBLOG_PORTABLE
+// #if LIBLOG_PORTABLE
             return type.GetTypeInfo().Assembly;
-#else
-            return type.Assembly;
-#endif
+// #else
+//             return type.Assembly;
+// #endif
         }
     }
 

@@ -1,5 +1,5 @@
 ﻿using LaunchDarkly.Client;
-using NUnit.Framework;
+using Xunit;
 
 namespace LaunchDarkly.Tests
 {
@@ -8,7 +8,7 @@ namespace LaunchDarkly.Tests
         private static string API_KEY = "YOUR_API_KEY";
         private static string FEATURE_KEY = "YOUR_FEATURE_KEY";
 
-        [Ignore("Manual")]
+        // [Ignore("Manual")]
         //[Test]
         public void ManualTest()
         {
@@ -20,7 +20,7 @@ namespace LaunchDarkly.Tests
             var user = User.WithKey("user@test.com");
             bool actual = client.Toggle(FEATURE_KEY, user, false);
 
-            Assert.IsTrue(actual);
+            Assert.True(actual);
             client.Flush();
             client.Dispose();
         }

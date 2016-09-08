@@ -168,3 +168,6 @@ pip-log.txt
 
 # Ignore built nupkgs
 *.nupkg
+
+# netcore project.json lock
+project.lock.json
